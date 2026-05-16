@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🗺️ Kuis Kenampakan Alam — IPAS Kelas 5</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#f5c842;--gold2:#e8a020;
+  --teal:#00c9b1;--coral:#ff6b6b;
+  --correct:#22c55e;--wrong:#ef4444;
+  --white:#f0fff4;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;min-height:100vh;background:#020e05;overflow-x:hidden;color:var(--white);}
+
+.bg-scene{position:fixed;inset:0;z-index:0;overflow:hidden;}
+.bg-sky{position:absolute;inset:0;background:linear-gradient(180deg,#010a03 0%,#051a09 35%,#083018 60%,#0b3d1a 75%,#072a0f 100%);}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--dur) ease-in-out infinite alternate;}
+@keyframes twinkle{from{opacity:.1;transform:scale(.7)}to{opacity:.85;transform:scale(1.3)}}
+.moon{position:absolute;top:5%;right:8%;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fffde7,#ffd54f);box-shadow:0 0 28px rgba(255,220,60,.4),0 0 55px rgba(255,200,40,.14);}
+.cloud-dark{position:absolute;background:rgba(4,32,8,.72);border-radius:999px;animation:drift var(--spd) linear infinite;}
+@keyframes drift{from{transform:translateX(-250px)}to{transform:translateX(calc(100vw + 250px))}}
+.mtn{position:absolute;bottom:0;width:0;height:0;border-style:solid;}
+.firefly{position:absolute;border-radius:50%;background:#b8ff44;animation:fly var(--dur) ease-in-out infinite alternate;filter:blur(.5px);}
+@keyframes fly{from{transform:translate(0,0);opacity:.2}to{transform:translate(var(--dx),var(--dy));opacity:.9}}
+.glow-ground{position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);width:110%;height:110px;background:radial-gradient(ellipse,rgba(18,120,45,.16) 0%,transparent 70%);border-radius:50%;}
+
+#app{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;}
+.screen{display:none;width:100%;max-width:480px;}
+.screen.active{display:block;}
+
+.glass{background:rgba(4,28,10,.72);border:1px solid rgba(80,200,110,.17);border-radius:24px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:26px 22px;box-shadow:0 8px 40px rgba(0,0,0,.55),inset 0 1px 0 rgba(120,255,140,.07);}
+
+.join-banner{text-align:center;margin-bottom:15px;animation:fadeDown .6s ease;}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
+.join-label{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+.join-code{font-family:'Fredoka One';font-size:40px;color:var(--gold);letter-spacing:8px;text-shadow:0 0 22px rgba(245,200,66,.45);animation:pgold 2s ease-in-out infinite;}
+@keyframes pgold{0%,100%{text-shadow:0 0 14px rgba(245,200,66,.35)}50%{text-shadow:0 0 36px rgba(245,200,66,.75)}}
+.join-sub{font-size:11px;color:rgba(255,255,255,.38);margin-top:2px;}
+
+.map-emoji{font-size:56px;display:block;text-align:center;margin-bottom:4px;animation:wobble 4s ease-in-out infinite;}
+@keyframes wobble{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(4deg) scale(1.06)}}
+.quiz-title{font-family:'Fredoka One';font-size:28px;text-align:center;color:var(--gold);line-height:1.1;margin-bottom:5px;}
+.quiz-sub{text-align:center;font-size:13px;color:rgba(255,255,255,.52);margin-bottom:18px;}
+.chips{display:flex;gap:7px;justify-content:center;margin-bottom:17px;flex-wrap:wrap;}
+.chip{padding:5px 12px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.4px;}
+.ch-d{background:rgba(34,197,94,.17);border:1px solid rgba(34,197,94,.42);color:#86efac;}
+.ch-p{background:rgba(79,195,247,.17);border:1px solid rgba(79,195,247,.42);color:#b3e5fc;}
+.ch-t{background:rgba(245,200,66,.12);border:1px solid rgba(245,200,66,.38);color:#fde68a;}
+.name-lbl{font-size:13px;color:rgba(255,255,255,.68);margin-bottom:5px;font-weight:700;}
+.name-input{width:100%;padding:13px 16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.17);border-radius:14px;color:#fff;font-size:16px;font-family:'Nunito';font-weight:700;outline:none;transition:all .2s;margin-bottom:17px;}
+.name-input::placeholder{color:rgba(255,255,255,.27);}
+.name-input:focus{border-color:var(--gold);background:rgba(255,255,255,.11);box-shadow:0 0 0 3px rgba(245,200,66,.17);}
+.info-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:19px;}
+.ibox{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:11px;text-align:center;}
+.ibox-num{font-family:'Fredoka One';font-size:26px;color:var(--teal);}
+.ibox-lbl{font-size:11px;color:rgba(255,255,255,.38);margin-top:2px;}
+.start-btn{width:100%;padding:16px;background:linear-gradient(135deg,#f5c842,#e8a020);border:none;border-radius:16px;font-family:'Fredoka One';font-size:20px;color:#1a0a00;cursor:pointer;letter-spacing:1px;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 18px rgba(245,200,66,.36);}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(245,200,66,.52);}
+
+.qhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;}
+.player-badge{display:flex;align-items:center;gap:6px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.26);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;}
+.ls{display:flex;flex-direction:column;align-items:flex-end;}
+.ls-lbl{font-size:10px;color:rgba(255,255,255,.42);text-transform:uppercase;letter-spacing:1px;}
+.ls-val{font-family:'Fredoka One';font-size:26px;color:var(--gold);line-height:1;transition:all .3s;}
+.sbump{animation:bump .4s ease;}
+@keyframes bump{0%{transform:scale(1)}50%{transform:scale(1.45);color:#ffec80}100%{transform:scale(1)}}
+
+.prog-wrap{margin-bottom:11px;}
+.prog-meta{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.42);margin-bottom:4px;}
+.prog-track{height:6px;background:rgba(255,255,255,.09);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#22c55e,#4fc3f7);transition:width .4s ease;box-shadow:0 0 7px rgba(34,197,94,.42);}
+
+.timer-row{display:flex;align-items:center;gap:8px;margin-bottom:13px;}
+.timer-track{flex:1;height:8px;background:rgba(255,255,255,.09);border-radius:99px;overflow:hidden;}
+.timer-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#22c55e,#f5c842);transition:width .9s linear,background .5s;}
+.timer-fill.warn{background:linear-gradient(90deg,#ef4444,#ff6b6b);}
+.timer-num{font-family:'Fredoka One';font-size:20px;min-width:32px;text-align:right;color:var(--gold);}
+.timer-num.warn{color:var(--coral);animation:blink .5s step-end infinite;}
+@keyframes blink{50%{opacity:.25}}
+
+.topic-badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;margin-bottom:10px;letter-spacing:.5px;}
+.tb-d{background:rgba(34,197,94,.2);color:#86efac;border:1px solid rgba(34,197,94,.36);}
+.tb-p{background:rgba(79,195,247,.17);color:#b3e5fc;border:1px solid rgba(79,195,247,.36);}
+
+/* ===== CARD FLIP ===== */
+.card-scene{perspective:1100px;margin-bottom:12px;}
+.card-3d{
+  width:100%;height:196px;position:relative;
+  transform-style:preserve-3d;
+  transition:transform .65s cubic-bezier(.4,0,.2,1);
+  cursor:default;
+}
+.card-3d.flipped{transform:rotateY(180deg);}
+.card-face{
+  position:absolute;inset:0;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  border-radius:20px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:18px 20px;
+}
+.card-front{
+  background:linear-gradient(145deg,rgba(8,45,18,.92),rgba(4,24,10,.96));
+  border:1px solid rgba(80,200,110,.2);
+  box-shadow:0 4px 20px rgba(0,0,0,.38),inset 0 1px 0 rgba(100,255,130,.08);
+}
+.card-back{
+  background:linear-gradient(145deg,rgba(0,70,28,.9),rgba(0,44,18,.96));
+  border:1px solid rgba(80,200,110,.2);
+  transform:rotateY(180deg);
+  box-shadow:0 4px 20px rgba(0,0,0,.38),inset 0 1px 0 rgba(100,255,130,.1);
+}
+.card-icon{font-size:32px;margin-bottom:7px;}
+.card-qlbl{font-size:10px;color:rgba(255,255,255,.42);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:6px;}
+.card-qtext{font-size:14px;font-weight:700;text-align:center;line-height:1.5;color:#fff;}
+
+/* lock pill shown on front when not answered */
+.lock-pill-wrap{position:absolute;bottom:13px;left:0;right:0;display:flex;justify-content:center;}
+.lock-pill{background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.13);border-radius:999px;padding:3px 12px;font-size:11px;color:rgba(255,255,255,.4);backdrop-filter:blur(4px);}
+
+/* back face */
+.card-albl{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;margin-bottom:6px;}
+.card-albl-ok{color:rgba(100,255,130,.55);}
+.card-albl-err{color:rgba(255,130,130,.55);}
+.card-atext{font-family:'Fredoka One';font-size:19px;text-align:center;line-height:1.3;}
+.card-atext-ok{color:#86efac;}
+.card-atext-err{color:#fca5a5;}
+.card-aexp{font-size:12px;color:rgba(200,255,210,.6);text-align:center;margin-top:8px;line-height:1.5;}
+.card-aexp-err{color:rgba(255,200,200,.6);}
+
+/* ===== FLIP TRIGGER ===== */
+.flip-trigger{
+  display:none;width:100%;padding:10px 15px;margin-bottom:9px;
+  background:rgba(0,201,177,.1);border:1px solid rgba(0,201,177,.3);
+  border-radius:14px;font-family:'Nunito';font-size:13px;font-weight:700;
+  color:#5eead4;cursor:pointer;transition:all .17s;letter-spacing:.3px;text-align:center;
+}
+.flip-trigger.show{display:block;}
+.flip-trigger:hover{background:rgba(0,201,177,.18);border-color:rgba(0,201,177,.5);}
+
+/* ===== OPTIONS ===== */
+.opt-btn{
+  display:block;width:100%;padding:12px 15px;margin-bottom:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);
+  border-radius:14px;color:#fff;font-family:'Nunito';font-size:14px;font-weight:700;
+  text-align:left;cursor:pointer;transition:all .17s;
+}
+.opt-btn:hover:not(:disabled){border-color:rgba(100,220,130,.36);background:rgba(34,197,94,.08);transform:translateX(4px);}
+.opt-btn.correct{background:rgba(34,197,94,.22);border-color:#22c55e;color:#86efac;}
+.opt-btn.wrong{background:rgba(239,68,68,.17);border-color:#ef4444;color:#fca5a5;}
+.opt-btn:disabled{cursor:default;}
+.opt-lbl{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:8px;background:rgba(255,255,255,.1);font-size:12px;font-weight:800;margin-right:10px;flex-shrink:0;}
+.opt-btn.correct .opt-lbl{background:#22c55e;color:#fff;}
+.opt-btn.wrong   .opt-lbl{background:#ef4444;color:#fff;}
+
+.feedback{display:none;padding:11px 14px;border-radius:14px;font-size:13px;line-height:1.5;font-weight:600;margin-bottom:8px;animation:slideUp .25s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.feedback.show{display:block;}
+.fb-ok{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#86efac;}
+.fb-bad{background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.27);color:#fca5a5;}
+
+.next-btn{display:none;width:100%;padding:14px;background:linear-gradient(135deg,#22c55e,#15803d);border:none;border-radius:14px;font-family:'Fredoka One';font-size:18px;color:#fff;cursor:pointer;letter-spacing:.5px;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 15px rgba(34,197,94,.3);}
+.next-btn.show{display:block;}
+.next-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(34,197,94,.46);}
+
+.pts-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-family:'Fredoka One';font-size:50px;color:var(--gold);text-shadow:0 0 34px rgba(245,200,66,.75);z-index:999;pointer-events:none;}
+.pts-popup.show{animation:popShow .8s ease forwards;}
+@keyframes popShow{0%{transform:translate(-50%,-50%) scale(0);opacity:1}40%{transform:translate(-50%,-80%) scale(1.35);opacity:1}100%{transform:translate(-50%,-120%) scale(.8);opacity:0}}
+
+.trophy{font-size:65px;text-align:center;display:block;margin-bottom:7px;animation:tbounce .8s ease;}
+@keyframes tbounce{0%{transform:scale(0) rotate(-18deg)}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+.rname{text-align:center;font-family:'Fredoka One';font-size:22px;color:var(--gold);margin-bottom:3px;}
+.rrank{text-align:center;font-size:13px;color:rgba(255,255,255,.52);margin-bottom:16px;}
+.big-score{text-align:center;font-family:'Fredoka One';font-size:68px;line-height:1;color:var(--gold);text-shadow:0 0 34px rgba(245,200,66,.52);margin-bottom:3px;}
+.bsl{text-align:center;font-size:11px;color:rgba(255,255,255,.42);margin-bottom:16px;letter-spacing:1px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;}
+.sbox{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:11px 8px;text-align:center;}
+.sv{font-family:'Fredoka One';font-size:24px;}.sl{font-size:10px;color:rgba(255,255,255,.42);margin-top:2px;}
+.sv-c{color:#86efac;}.sv-w{color:#fca5a5;}.sv-p{color:var(--teal);}
+.rmsg{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:13px;font-size:14px;line-height:1.6;color:rgba(255,255,255,.76);text-align:center;margin-bottom:16px;}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-re,.btn-sh{padding:12px;border:none;border-radius:14px;font-family:'Fredoka One';font-size:16px;cursor:pointer;transition:transform .15s;}
+.btn-re{background:linear-gradient(135deg,#f5c842,#e8a020);color:#1a0a00;}
+.btn-sh{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#fff;}
+.btn-re:hover,.btn-sh:hover{transform:translateY(-2px);}
+
+.cp{position:fixed;width:9px;height:9px;border-radius:2px;animation:cfall var(--dur) ease-in forwards;z-index:500;}
+@keyframes cfall{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),100vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="bg-scene">
+  <div class="bg-sky"></div>
+  <div id="sw"></div>
+  <div class="moon"></div>
+  <div id="cw"></div>
+  <div class="mtn" style="left:0;border-width:0 190px 270px 0;border-color:transparent transparent #050f07 transparent;"></div>
+  <div class="mtn" style="left:110px;border-width:0 130px 200px 0;border-color:transparent transparent #071508 transparent;"></div>
+  <div class="mtn" style="right:0;border-width:0 0 290px 210px;border-color:transparent transparent #050f07 transparent;"></div>
+  <div class="mtn" style="right:100px;border-width:0 0 210px 150px;border-color:transparent transparent #071508 transparent;"></div>
+  <div class="mtn" style="left:50%;transform:translateX(-50%);border-width:0 160px 230px 160px;border-color:transparent transparent #040e06 transparent;"></div>
+  <svg style="position:absolute;bottom:0;left:3%;width:26px;height:55px;" viewBox="0 0 26 55"><polygon points="13,0 26,36 0,36" fill="#0a2e0e"/><rect x="9" y="36" width="8" height="19" fill="#061a08"/></svg>
+  <svg style="position:absolute;bottom:0;left:9%;width:20px;height:43px;" viewBox="0 0 20 43"><polygon points="10,0 20,28 0,28" fill="#0d3812"/><rect x="7" y="28" width="6" height="15" fill="#072010"/></svg>
+  <svg style="position:absolute;bottom:0;right:5%;width:28px;height:58px;" viewBox="0 0 28 58"><polygon points="14,0 28,38 0,38" fill="#0a2e0e"/><rect x="10" y="38" width="8" height="20" fill="#061a08"/></svg>
+  <svg style="position:absolute;bottom:0;right:12%;width:18px;height:40px;" viewBox="0 0 18 40"><polygon points="9,0 18,26 0,26" fill="#0d3812"/><rect x="6" y="26" width="6" height="14" fill="#072010"/></svg>
+  <div class="glow-ground"></div>
+  <div id="fw"></div>
+</div>
+
+<div class="pts-popup" id="pts-popup">+100</div>
+
+<div id="app">
+
+  <!-- START -->
+  <div class="screen active" id="start-screen">
+    <div class="join-banner glass" style="padding:13px 18px;margin-bottom:15px;">
+      <div class="join-label">🎮 Kode Join Kuis</div>
+      <div class="join-code" id="jcode">---</div>
+      <div class="join-sub">Bagikan kode ini ke teman-temanmu!</div>
+    </div>
+    <div class="glass">
+      <span class="map-emoji">🗺️</span>
+      <div class="quiz-title">Kenampakan Alam!</div>
+      <div class="quiz-sub">IPAS Kelas 5 — Daratan &amp; Perairan Indonesia</div>
+      <div class="chips">
+        <span class="chip ch-d">🏔️ Daratan</span>
+        <span class="chip ch-p">💧 Perairan</span>
+        <span class="chip ch-t">⏱️ 60 detik/kartu</span>
+      </div>
+      <div class="info-row">
+        <div class="ibox"><div class="ibox-num">15</div><div class="ibox-lbl">Kartu Soal</div></div>
+        <div class="ibox"><div class="ibox-num">150</div><div class="ibox-lbl">Poin Maks</div></div>
+      </div>
+      <div class="name-lbl">✏️ Nama Siswa</div>
+      <input class="name-input" id="ninput" type="text" placeholder="Tulis namamu di sini..." maxlength="30" autocomplete="off">
+      <button class="start-btn" onclick="startQuiz()">🚀 MULAI KUIS!</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="quiz-screen">
+    <div class="qhdr">
+      <div class="player-badge">🧑‍🎓 <span id="pname">Siswa</span></div>
+      <div class="ls"><div class="ls-lbl">POIN</div><div class="ls-val" id="lscore">0</div></div>
+    </div>
+    <div class="glass">
+      <div class="prog-wrap">
+        <div class="prog-meta"><span id="qctr">Kartu 1 / 15</span><span id="tlbl">🏔️ Daratan</span></div>
+        <div class="prog-track"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+      </div>
+      <div class="timer-row">
+        <div class="timer-track"><div class="timer-fill" id="tfill" style="width:100%"></div></div>
+        <div class="timer-num" id="tnum">60</div>
+      </div>
+
+      <div id="tbadge" class="topic-badge tb-d">🏔️ DARATAN</div>
+
+      <div class="card-scene">
+        <div class="card-3d" id="card3d">
+          <div class="card-face card-front">
+            <div class="card-icon" id="cicon">🌋</div>
+            <div class="card-qlbl">Pertanyaan</div>
+            <div class="card-qtext" id="cqtext">...</div>
+            <div class="lock-pill-wrap"><div class="lock-pill" id="lockpill">🔒 Jawab dulu untuk melihat jawaban</div></div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-icon" id="cicon2">✅</div>
+            <div class="card-albl" id="calbl">Jawaban</div>
+            <div class="card-atext" id="catext">—</div>
+            <div class="card-aexp" id="caexp">—</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="flip-trigger" id="flip-trigger" onclick="flipCard()">🔄 Lihat Jawaban &amp; Penjelasan di Kartu</button>
+
+      <div id="owrap"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="nextbtn" onclick="nextQ()">Kartu Berikutnya →</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="result-screen">
+    <div class="glass">
+      <span class="trophy" id="trophy">🏆</span>
+      <div class="rname" id="rname">Siswa</div>
+      <div class="rrank" id="rrank">Ahli Geografi!</div>
+      <div class="big-score" id="bscore">0</div>
+      <div class="bsl">TOTAL POIN</div>
+      <div class="stats-grid">
+        <div class="sbox"><div class="sv sv-c" id="rc">0</div><div class="sl">Benar ✓</div></div>
+        <div class="sbox"><div class="sv sv-w" id="rw">0</div><div class="sl">Salah ✗</div></div>
+        <div class="sbox"><div class="sv sv-p" id="rp">0%</div><div class="sl">Akurasi</div></div>
+      </div>
+      <div class="rmsg" id="rmsg"></div>
+      <div class="btn-row">
+        <button class="btn-re" onclick="restartQuiz()">🔄 Ulangi</button>
+        <button class="btn-sh" onclick="shareResult()">📤 Bagikan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// BG
+(function(){
+  const sw=document.getElementById('sw');
+  for(let i=0;i<75;i++){const s=document.createElement('div');s.className='star';const z=Math.random()*2.5+.4;s.style.cssText=`width:${z}px;height:${z}px;top:${Math.random()*68}%;left:${Math.random()*100}%;--dur:${(Math.random()*2+.8).toFixed(1)}s;animation-delay:${(Math.random()*2).toFixed(1)}s`;sw.appendChild(s);}
+  const cw=document.getElementById('cw');
+  for(let i=0;i<3;i++){const c=document.createElement('div');c.className='cloud-dark';const w=70+Math.random()*110,h=18+Math.random()*22;c.style.cssText=`width:${w}px;height:${h}px;top:${8+Math.random()*28}%;--spd:${(25+Math.random()*25).toFixed(0)}s;animation-delay:-${(Math.random()*20).toFixed(0)}s`;cw.appendChild(c);}
+  const fw=document.getElementById('fw');
+  for(let i=0;i<22;i++){const f=document.createElement('div');f.className='firefly';const z=Math.random()*3+1.5;f.style.cssText=`width:${z}px;height:${z}px;bottom:${4+Math.random()*38}%;left:${Math.random()*100}%;--dur:${(2+Math.random()*3).toFixed(1)}s;--dx:${(Math.random()*50-25).toFixed(0)}px;--dy:${(Math.random()*50-25).toFixed(0)}px;animation-delay:${(Math.random()*3).toFixed(1)}s`;fw.appendChild(f);}
+})();
+
+// JOIN CODE
+const JC=(()=>{const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<6;i++)r+=c[Math.floor(Math.random()*c.length)];return r;})();
+document.getElementById('jcode').textContent=JC;
+
+// QUESTIONS — Advanced / Process-based
+const QS=[
+  {
+    topic:'daratan',icon:'🌋',
+    q:'Daerah sekitar gunung berapi memiliki tanah subur meski berbahaya. Mengapa abu vulkanik menyuburkan tanah?',
+    ans:'Mengandung mineral fosfor, kalium, dan kalsium yang dibutuhkan tanaman',
+    opts:['Mengandung mineral fosfor, kalium, dan kalsium yang dibutuhkan tanaman','Suhunya panas sehingga mempercepat pertumbuhan tanaman','Lava yang mengeras menyimpan banyak air hujan','Gunung melindungi lahan dari angin kencang'],
+    correct:0,
+    exp:'Abu vulkanik kaya mineral seperti fosfor, kalium, kalsium, dan magnesium yang sangat dibutuhkan akar tanaman. Itulah mengapa petani di lereng Gunung Merapi dan Semeru menghasilkan panen berlimpah.'
+  },
+  {
+    topic:'daratan',icon:'🏔️',
+    q:'Apa perbedaan mendasar antara plato dan dataran tinggi meskipun keduanya berada di ketinggian >200 mdpl?',
+    ans:'Plato berpermukaan datar seperti meja, dataran tinggi bergelombang dan berbukit',
+    opts:['Plato berpermukaan datar seperti meja, dataran tinggi bergelombang dan berbukit','Plato selalu lebih tinggi dari dataran tinggi','Dataran tinggi hanya ada di Pulau Jawa','Plato terbentuk hanya dari aktivitas gunung berapi'],
+    correct:0,
+    exp:'Dataran tinggi memiliki relief berbukit dan bergelombang, sedangkan plato permukaannya relatif datar namun lebih tinggi dari daerah sekitarnya — seperti meja raksasa. Contoh plato: Plato Dieng di Jawa Tengah.'
+  },
+  {
+    topic:'daratan',icon:'🌿',
+    q:'Petani di dataran tinggi menanam sayuran dan teh, bukan padi sawah. Apa alasan ilmiahnya?',
+    ans:'Suhu rendah dan curah hujan merata cocok untuk sayuran; padi butuh suhu hangat dan genangan air',
+    opts:['Suhu rendah dan curah hujan merata cocok untuk sayuran; padi butuh suhu hangat dan genangan air','Dataran tinggi tidak memiliki cukup air untuk menggenangi sawah','Sayuran lebih mahal dari padi sehingga menguntungkan','Padi hanya bisa tumbuh di daerah pantai'],
+    correct:0,
+    exp:'Suhu sejuk 15–22°C di dataran tinggi ideal untuk sayuran dan teh. Padi memerlukan suhu 22–30°C dan sistem irigasi genangan yang sulit diterapkan di lahan berbukit. Ini contoh pengaruh kenampakan alam terhadap aktivitas pertanian.'
+  },
+  {
+    topic:'daratan',icon:'🏞️',
+    q:'Lembah Sianok di Bukittinggi terbentuk dari proses geologi yang kompleks. Proses apa yang paling berperan?',
+    ans:'Patahan tektonik (sesar Semangko) yang diperdalam erosi Sungai Batang Sianok',
+    opts:['Patahan tektonik (sesar Semangko) yang diperdalam erosi Sungai Batang Sianok','Letusan Gunung Singgalang yang membentuk kawah besar','Abrasi air laut jutaan tahun lalu','Penggalian oleh manusia purba untuk pertahanan'],
+    correct:0,
+    exp:'Lembah Sianok terbentuk akibat pergerakan Sesar Semangko yang membelah Pegunungan Bukit Barisan. Selama jutaan tahun, Sungai Batang Sianok mengikis dasar patahan sehingga membentuk ngarai yang indah sedalam ±100 m.'
+  },
+  {
+    topic:'daratan',icon:'⛰️',
+    q:'Garis kontur pada peta topografi sangat rapat di suatu wilayah. Apa kesimpulan yang paling tepat tentang wilayah tersebut?',
+    ans:'Lereng sangat curam, berpotensi tinggi longsor dan banjir bandang',
+    opts:['Lereng sangat curam, berpotensi tinggi longsor dan banjir bandang','Wilayah tersebut merupakan dataran rendah yang subur','Terdapat cadangan air tanah yang besar di bawahnya','Wilayah ini aman dan cocok untuk permukiman padat'],
+    correct:0,
+    exp:'Garis kontur rapat menunjukkan perubahan ketinggian drastis dalam jarak pendek = lereng sangat curam. Ini berisiko tinggi terhadap longsor dan banjir bandang, sehingga wilayah tersebut tidak cocok untuk permukiman tanpa mitigasi bencana.'
+  },
+  {
+    topic:'daratan',icon:'🌊',
+    q:'Tanjung Priok di Jakarta menjadi pelabuhan tersibuk di Indonesia. Mengapa bentuk tanjung cocok untuk pelabuhan?',
+    ans:'Tanjung menjorok ke laut sehingga kapal dapat berlabuh dari berbagai arah dengan aman',
+    opts:['Tanjung menjorok ke laut sehingga kapal dapat berlabuh dari berbagai arah dengan aman','Tanjung selalu memiliki kedalaman laut yang paling dalam','Tanjung terlindung dari semua arah angin dan ombak','Tanjung selalu dekat dengan pusat kota'],
+    correct:0,
+    exp:'Tanjung yang menjorok ke laut memungkinkan kapal bersandar dari berbagai sisi. Posisinya yang menonjol juga memudahkan navigasi dan pengawasan lalu lintas kapal. Namun tanjung berbeda dengan teluk yang lebih terlindung dari ombak.'
+  },
+  {
+    topic:'daratan',icon:'🪨',
+    q:'Mengapa bukit tidak dapat meletus seperti gunung berapi, meskipun sama-sama merupakan tonjolan daratan?',
+    ans:'Bukit terbentuk dari erosi dan pengangkatan tektonik, tidak terhubung dengan magma',
+    opts:['Bukit terbentuk dari erosi dan pengangkatan tektonik, tidak terhubung dengan magma','Bukit terlalu kecil untuk menyimpan magma di dalamnya','Bukit hanya mengandung batuan sedimen yang tidak panas','Bukit selalu berada jauh dari lempeng tektonik aktif'],
+    correct:0,
+    exp:'Gunung berapi terhubung langsung dengan kantong magma di dalam bumi. Bukit terbentuk dari proses pengangkatan lempeng bumi atau erosi batuan dalam waktu sangat lama tanpa keterlibatan magma, sehingga tidak bisa meletus.'
+  },
+  {
+    topic:'perairan',icon:'💧',
+    q:'Danau Toba terbentuk ±74.000 tahun lalu dan menjadi danau terbesar di Asia Tenggara. Proses apa yang membentuknya?',
+    ans:'Letusan supervulkan Toba yang membentuk kaldera raksasa, lalu terisi air hujan dan sungai',
+    opts:['Letusan supervulkan Toba yang membentuk kaldera raksasa, lalu terisi air hujan dan sungai','Penggenangan alami dari Samudera Hindia yang masuk ke daratan','Pembendungan Sungai Asahan oleh longsoran tanah besar','Erosi ribuan tahun yang membentuk cekungan besar di Sumatera'],
+    correct:0,
+    exp:'Sekitar 74.000 tahun lalu, letusan Supervulkan Toba adalah salah satu letusan terbesar dalam sejarah bumi. Kaldera raksasa seluas 1.707 km² yang terbentuk kemudian terisi air dan menghasilkan Danau Toba dengan Pulau Samosir di tengahnya.'
+  },
+  {
+    topic:'perairan',icon:'🌊',
+    q:'Sungai Kapuas di Kalimantan mengalir sangat lambat di bagian hilirnya dan sering banjir. Mengapa demikian?',
+    ans:'Dataran rendah Kalimantan membuat gradien sungai sangat kecil sehingga air tidak cepat mengalir ke laut',
+    opts:['Dataran rendah Kalimantan membuat gradien sungai sangat kecil sehingga air tidak cepat mengalir ke laut','Kalimantan tidak memiliki gunung tinggi sebagai sumber air','Tanah di Kalimantan sangat keras sehingga air tidak meresap','Sungai Kapuas terlalu lebar sehingga alirannya melambat'],
+    correct:0,
+    exp:'Di dataran rendah, perbedaan ketinggian antara hulu-hilir sangat kecil = gradien rendah. Air mengalir lambat, membawa banyak sedimen, dan saat musim hujan volume air melebihi kapasitas sungai sehingga meluap ke dataran sekitarnya.'
+  },
+  {
+    topic:'perairan',icon:'🌿',
+    q:'Rawa mangrove di muara sungai sering disebut "apotik hijau" ekosistem pesisir. Mengapa mangrove sangat penting?',
+    ans:'Tempat pemijahan ikan, penahan abrasi pantai, penyerap karbon, dan pelindung dari badai',
+    opts:['Tempat pemijahan ikan, penahan abrasi pantai, penyerap karbon, dan pelindung dari badai','Sumber air tawar utama bagi penduduk pesisir','Menghalangi masuknya gelombang tsunami sepenuhnya','Lahan cadangan untuk perluasan kota pesisir'],
+    correct:0,
+    exp:'Mangrove adalah ekosistem multifungsi: (1) tempat pemijahan dan pembesaran ikan/udang, (2) akar napas mangrove menahan erosi pantai, (3) menyerap CO₂ 5× lebih banyak dari hutan tropis biasa, dan (4) meredam energi gelombang badai dan tsunami.'
+  },
+  {
+    topic:'perairan',icon:'🌀',
+    q:'Muara sungai besar terus mengalami pendangkalan dari tahun ke tahun. Apa proses utama yang menyebabkan hal ini?',
+    ans:'Sedimentasi: material dari hulu mengendap saat kecepatan aliran berkurang di muara',
+    opts:['Sedimentasi: material dari hulu mengendap saat kecepatan aliran berkurang di muara','Air laut yang masuk membawa pasir dan lumpur ke sungai','Akar tanaman mangrove menghambat aliran sungai','Penurunan muka air laut yang membuat dasar sungai naik'],
+    correct:0,
+    exp:'Ketika sungai bertemu laut, energi kinetik aliran hilang drastis. Partikel sedimen yang tadinya terbawa suspensi mulai mengendap. Deforestasi di hulu mempercepat erosi tanah dan meningkatkan volume sedimen yang dibawa ke muara.'
+  },
+  {
+    topic:'perairan',icon:'🗺️',
+    q:'Teluk Jakarta mengalami pencemaran parah meskipun berbatasan langsung dengan laut lepas. Mengapa pencemar sulit terdispersi?',
+    ans:'Bentuk teluk yang semi-tertutup membatasi sirkulasi air laut, sehingga polutan dari sungai terakumulasi',
+    opts:['Bentuk teluk yang semi-tertutup membatasi sirkulasi air laut, sehingga polutan dari sungai terakumulasi','Teluk Jakarta terlalu dangkal untuk menyerap polutan','Arus Laut Jawa selalu membawa polutan dari luar ke teluk','Tidak ada organisme di teluk yang bisa mengurai polutan'],
+    correct:0,
+    exp:'Geometri teluk yang diapit daratan di tiga sisi membatasi pertukaran massa air dengan laut terbuka. Limbah dari 13 sungai yang bermuara ke Teluk Jakarta terakumulasi dan sulit terdilusi, menyebabkan hipoksia (kekurangan oksigen) dan kematian biota laut.'
+  },
+  {
+    topic:'perairan',icon:'🔵',
+    q:'Selat Malaka dijaga ketat oleh angkatan laut beberapa negara. Mengapa selat ini begitu strategis secara geopolitik?',
+    ans:'Jalur pelayaran tersibuk di dunia, menghubungkan Samudera Hindia–Pasifik; 25% perdagangan global melewatinya',
+    opts:['Jalur pelayaran tersibuk di dunia, menghubungkan Samudera Hindia–Pasifik; 25% perdagangan global melewatinya','Selat Malaka adalah satu-satunya jalur kapal selam militer di Asia','Mengandung cadangan minyak bumi terbesar di dunia','Merupakan jalur migrasi ikan tuna terbesar di Asia Tenggara'],
+    correct:0,
+    exp:'Selat Malaka (±900 km) adalah jalur terpendek antara Samudera Hindia dan Laut China Selatan. Setiap tahun ±100.000 kapal melewatinya membawa minyak dari Timur Tengah ke Asia Timur. Gangguan di selat ini bisa memicu krisis energi global.'
+  },
+  {
+    topic:'perairan',icon:'🏖️',
+    q:'Delta Mahakam di Kalimantan Timur terus bertumbuh ke arah laut. Faktor utama apa yang menentukan laju pertumbuhannya?',
+    ans:'Volume dan laju sedimentasi dari hulu DAS Mahakam, dipengaruhi tingkat deforestasi',
+    opts:['Volume dan laju sedimentasi dari hulu DAS Mahakam, dipengaruhi tingkat deforestasi','Pasang surut laut yang mendorong sedimen laut ke daratan','Aktivitas penambangan batu bara di dasar laut Selat Makassar','Angin musim yang membawa material dari Pulau Sulawesi'],
+    correct:0,
+    exp:'Delta tumbuh ketika laju pengendapan > laju erosi oleh ombak. Penebangan hutan di hulu DAS Mahakam mempercepat erosi, meningkatkan muatan sedimen sungai. Namun kenaikan muka air laut akibat perubahan iklim dapat mengimbangi atau bahkan membalikkan pertumbuhan delta.'
+  },
+  {
+    topic:'perairan',icon:'💦',
+    q:'Banjir besar sering melanda dataran rendah di sekitar muara sungai saat musim hujan. Apa kombinasi faktor penyebabnya?',
+    ans:'Debit sungai melonjak + kemiringan rendah + pasang laut yang menghalangi aliran + hilangnya daerah resapan',
+    opts:['Debit sungai melonjak + kemiringan rendah + pasang laut yang menghalangi aliran + hilangnya daerah resapan','Curah hujan tinggi saja yang melebihi kapasitas sungai','Sungai membuang air ke laut terlalu cepat sehingga meluap','Tanah dataran rendah tidak dapat menyerap air sama sekali'],
+    correct:0,
+    exp:'Banjir di dataran rendah adalah fenomena multi-faktor: (1) intensitas hujan tinggi di hulu, (2) gradien sungai sangat kecil di hilir, (3) pasang laut menghambat aliran ke laut (banjir rob), dan (4) konversi lahan basah dan mangrove menghilangkan kemampuan penyerapan air alami.'
+  }
+];
+
+// STATE
+let cur=0,score=0,corr=0,wrng=0;
+let tInterval=null,tLeft=60;
+let answered=false;
+let pName='Siswa';
+const TMAX=60;
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function startQuiz(){
+  const n=document.getElementById('ninput').value.trim();
+  pName=n||'Penjelajah';
+  cur=0;score=0;corr=0;wrng=0;
+  document.getElementById('pname').textContent=pName;
+  document.getElementById('lscore').textContent='0';
+  show('quiz-screen');
+  renderQ();
+}
+
+function renderQ(){
+  answered=false;
+  clearInterval(tInterval);
+  const q=QS[cur];
+  const pct=Math.round((cur/QS.length)*100);
+
+  document.getElementById('qctr').textContent=`Kartu ${cur+1} / ${QS.length}`;
+  document.getElementById('tlbl').textContent=q.topic==='daratan'?'🏔️ Daratan':'💧 Perairan';
+  document.getElementById('pfill').style.width=pct+'%';
+
+  const badge=document.getElementById('tbadge');
+  if(q.topic==='daratan'){badge.className='topic-badge tb-d';badge.textContent='🏔️ DARATAN';}
+  else{badge.className='topic-badge tb-p';badge.textContent='💧 PERAIRAN';}
+
+  // Card front
+  document.getElementById('cicon').textContent=q.icon;
+  document.getElementById('cqtext').textContent=q.q;
+
+  // Card back — pre-fill but hidden until flip
+  document.getElementById('cicon2').textContent='✅';
+  document.getElementById('calbl').className='card-albl card-albl-ok';
+  document.getElementById('calbl').textContent='Jawaban Benar';
+  document.getElementById('catext').className='card-atext card-atext-ok';
+  document.getElementById('catext').textContent=q.ans;
+  document.getElementById('caexp').className='card-aexp';
+  document.getElementById('caexp').textContent=q.exp;
+
+  // Reset card — cannot flip yet
+  const card=document.getElementById('card3d');
+  card.classList.remove('flipped');
+  card.style.pointerEvents='none'; // disable click on card itself
+
+  // Show lock pill
+  document.getElementById('lockpill').style.display='flex';
+
+  // Reset UI
+  document.getElementById('flip-trigger').className='flip-trigger';
+  document.getElementById('nextbtn').className='next-btn';
+  document.getElementById('nextbtn').textContent=cur===QS.length-1?'🏆 Lihat Hasil':'Kartu Berikutnya →';
+  document.getElementById('feedback').className='feedback';
+
+  // Options
+  const ow=document.getElementById('owrap');
+  ow.innerHTML='';
+  q.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.innerHTML=`<span class="opt-lbl">${String.fromCharCode(65+i)}</span>${opt}`;
+    btn.onclick=()=>pick(i);
+    ow.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+// Flip ONLY after answering
+function flipCard(){
+  document.getElementById('card3d').classList.toggle('flipped');
+}
+
+function startTimer(){
+  tLeft=TMAX;updateTimerUI();
+  tInterval=setInterval(()=>{tLeft--;updateTimerUI();if(tLeft<=0){clearInterval(tInterval);if(!answered)timeUp();}},1000);
+}
+function updateTimerUI(){
+  const pct=(tLeft/TMAX)*100;
+  document.getElementById('tfill').style.width=pct+'%';
+  document.getElementById('tnum').textContent=tLeft;
+  const w=tLeft<=10;
+  document.getElementById('tfill').className='timer-fill'+(w?' warn':'');
+  document.getElementById('tnum').className='timer-num'+(w?' warn':'');
+}
+
+function timeUp(){
+  answered=true;wrng++;
+  const q=QS[cur];
+  const btns=document.querySelectorAll('.opt-btn');
+  btns.forEach(b=>b.disabled=true);
+  btns[q.correct].classList.add('correct');
+
+  // Update card back to wrong style
+  document.getElementById('cicon2').textContent='⏰';
+  document.getElementById('calbl').className='card-albl card-albl-err';
+  document.getElementById('calbl').textContent='Waktu Habis — Jawaban Benar:';
+  document.getElementById('catext').className='card-atext card-atext-err';
+  document.getElementById('caexp').className='card-aexp card-aexp-err';
+
+  // Unlock flip
+  document.getElementById('card3d').style.pointerEvents='auto';
+  document.getElementById('lockpill').style.display='none';
+  document.getElementById('flip-trigger').className='flip-trigger show';
+
+  const fb=document.getElementById('feedback');
+  fb.className='feedback fb-bad show';
+  fb.innerHTML=`⏰ <strong>Waktu habis!</strong> Klik kartu atau tombol di atas untuk lihat jawaban.`;
+  document.getElementById('nextbtn').className='next-btn show';
+}
+
+function pick(idx){
+  if(answered)return;
+  answered=true;
+  clearInterval(tInterval);
+  const q=QS[cur];
+  const btns=document.querySelectorAll('.opt-btn');
+  btns.forEach(b=>b.disabled=true);
+  btns[q.correct].classList.add('correct');
+  const fb=document.getElementById('feedback');
+
+  if(idx===q.correct){
+    corr++;
+    const pts=10+Math.round(tLeft*0.5);
+    score+=pts;
+    btns[idx].classList.add('correct');
+    fb.className='feedback fb-ok show';
+    fb.innerHTML=`✅ <strong>Benar!</strong> Klik kartu untuk lihat penjelasan lengkapnya.`;
+    document.getElementById('cicon2').textContent='✅';
+    document.getElementById('calbl').className='card-albl card-albl-ok';
+    document.getElementById('catext').className='card-atext card-atext-ok';
+    document.getElementById('caexp').className='card-aexp';
+    updateScore(pts,true);
+  } else {
+    wrng++;
+    btns[idx].classList.add('wrong');
+    fb.className='feedback fb-bad show';
+    fb.innerHTML=`❌ <strong>Kurang tepat.</strong> Klik kartu untuk lihat jawaban yang benar.`;
+    document.getElementById('cicon2').textContent='❌';
+    document.getElementById('calbl').className='card-albl card-albl-err';
+    document.getElementById('calbl').textContent='Jawaban Benar';
+    document.getElementById('catext').className='card-atext card-atext-err';
+    document.getElementById('caexp').className='card-aexp card-aexp-err';
+  }
+
+  // UNLOCK card flip
+  document.getElementById('card3d').style.pointerEvents='auto';
+  document.getElementById('lockpill').style.display='none';
+  document.getElementById('flip-trigger').className='flip-trigger show';
+  document.getElementById('nextbtn').className='next-btn show';
+}
+
+function updateScore(pts,pop){
+  document.getElementById('lscore').textContent=score;
+  const sv=document.getElementById('lscore');
+  sv.classList.remove('sbump');void sv.offsetWidth;sv.classList.add('sbump');
+  if(pop){const p=document.getElementById('pts-popup');p.textContent=`+${pts}`;p.className='pts-popup show';setTimeout(()=>{p.className='pts-popup';},820);}
+}
+
+function nextQ(){cur++;if(cur>=QS.length)showResult();else renderQ();}
+
+function showResult(){
+  clearInterval(tInterval);
+  show('result-screen');
+  const pct=Math.round((corr/QS.length)*100);
+  document.getElementById('rname').textContent=pName;
+  document.getElementById('bscore').textContent=score;
+  document.getElementById('rc').textContent=corr;
+  document.getElementById('rw').textContent=wrng;
+  document.getElementById('rp').textContent=pct+'%';
+  let trophy,rank,msg;
+  if(pct>=87)     {trophy='🏆';rank='Ahli Geografi!';        msg=`Luar biasa, ${pName}! Kamu tidak hanya hafal nama kenampakan alam, tapi memahami proses terbentuk dan dampaknya bagi kehidupan. Calon ilmuwan bumi sejati!`;}
+  else if(pct>=67){trophy='🌟';rank='Penjelajah Handal!';    msg=`Kerja bagus, ${pName}! Pemahamanmu sudah solid. Perdalam lagi hubungan sebab-akibat antara kenampakan alam dan kehidupan manusia di sekitarnya.`;}
+  else if(pct>=47){trophy='📚';rank='Terus Semangat!';       msg=`Kamu sudah berusaha, ${pName}. Fokus memahami *mengapa* suatu kenampakan terbentuk, bukan sekadar menghafal namanya. Coba lagi setelah membaca ulang materinya!`;}
+  else            {trophy='💪';rank='Jangan Menyerah!';      msg=`Tidak apa-apa, ${pName}. Pelajari kembali proses terbentuknya kenampakan alam daratan dan perairan, lalu kerjakan kuis ini lagi. Kamu pasti bisa!`;}
+  document.getElementById('trophy').textContent=trophy;
+  document.getElementById('rrank').textContent=rank;
+  document.getElementById('rmsg').textContent=msg;
+  if(pct>=67)launchConfetti();
+}
+
+function launchConfetti(){
+  const cols=['#f5c842','#00c9b1','#22c55e','#4fc3f7','#86efac','#fde68a'];
+  for(let i=0;i<60;i++){
+    setTimeout(()=>{
+      const c=document.createElement('div');c.className='cp';
+      c.style.cssText=`left:${Math.random()*100}%;top:-10px;background:${cols[i%cols.length]};--dur:${(1.5+Math.random()*1.5).toFixed(1)}s;--dx:${(Math.random()-.5)*380}px;animation-delay:${(Math.random()*.5).toFixed(2)}s;transform:rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),3000);
+    },i*28);
+  }
+}
+
+function shareResult(){
+  const pct=Math.round((corr/QS.length)*100);
+  const txt=`🗺️ Kuis Kenampakan Alam — IPAS Kelas 5\n👤 ${pName}\n🏆 Skor: ${score} poin\n✅ Benar: ${corr}/15 (${pct}%)\n🎮 Kode: ${JC}`;
+  if(navigator.share)navigator.share({title:'Kuis Kenampakan Alam',text:txt});
+  else if(navigator.clipboard){navigator.clipboard.writeText(txt);alert('Hasil disalin!');}
+}
+
+function restartQuiz(){document.getElementById('ninput').value='';show('start-screen');}
+</script>
+</body>
+</html>
